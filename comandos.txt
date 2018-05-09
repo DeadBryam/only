@@ -1,0 +1,129 @@
+a)
+
+Disco /dev/sdd: 350 GiB, 375809638400 bytes, 734003200 sectores
+Unidades: sectores de 1 * 512 = 512 bytes
+Tamaño de sector (lógico/físico): 512 bytes / 512 bytes
+Tamaño de E/S (mínimo/óptimo): 512 bytes / 512 bytes
+Tipo de etiqueta de disco: dos
+Identificador del disco: 0x00000000
+
+Disposit.  Inicio  Comienzo     Final  Sectores Tamaño Id Tipo
+/dev/sdd1              2048 262146047 262144000   125G 8e Linux LVM
+/dev/sdd2         262146048 524290047 262144000   125G 8e Linux LVM
+/dev/sdd3         524290048 734003199 209713152   100G  5 Extendida
+/dev/sdd5         524292096 734003199 209711104   100G 8e Linux LVM
+
+
+Disco /dev/sdc: 250 GiB, 268435456000 bytes, 524288000 sectores
+Unidades: sectores de 1 * 512 = 512 bytes
+Tamaño de sector (lógico/físico): 512 bytes / 512 bytes
+Tamaño de E/S (mínimo/óptimo): 512 bytes / 512 bytes
+Tipo de etiqueta de disco: dos
+Identificador del disco: 0x00000000
+
+Disposit.  Inicio  Comienzo     Final  Sectores Tamaño Id Tipo
+/dev/sdc1              2048 262146047 262144000   125G 8e Linux LVM
+/dev/sdc2         262146048 524287999 262141952   125G 8e Linux LVM
+
+
+Disco /dev/sdb: 100 GiB, 107374182400 bytes, 209715200 sectores
+Unidades: sectores de 1 * 512 = 512 bytes
+Tamaño de sector (lógico/físico): 512 bytes / 512 bytes
+Tamaño de E/S (mínimo/óptimo): 512 bytes / 512 bytes
+Tipo de etiqueta de disco: dos
+Identificador del disco: 0x3ef889d8
+
+Disposit.  Inicio Comienzo     Final  Sectores Tamaño Id Tipo
+/dev/sdb1             2048 209715199 209713152   100G 8e Linux LVM
+
+
+Disco /dev/sde: 500 GiB, 536870912000 bytes, 1048576000 sectores
+Unidades: sectores de 1 * 512 = 512 bytes
+Tamaño de sector (lógico/físico): 512 bytes / 512 bytes
+Tamaño de E/S (mínimo/óptimo): 512 bytes / 512 bytes
+
+
+Disco /dev/sda: 80 GiB, 85899345920 bytes, 167772160 sectores
+Unidades: sectores de 1 * 512 = 512 bytes
+Tamaño de sector (lógico/físico): 512 bytes / 512 bytes
+Tamaño de E/S (mínimo/óptimo): 512 bytes / 512 bytes
+Tipo de etiqueta de disco: dos
+Identificador del disco: 0x44e17ad7
+
+Disposit.  Inicio  Comienzo     Final  Sectores Tamaño Id Tipo
+/dev/sda1  *           2048 165675007 165672960    79G 83 Linux
+/dev/sda2         165677054 167770111   2093058  1022M  5 Extendida
+/dev/sda5         165677056 167770111   2093056  1022M 82 Linux swap / Solaris
+
+
+
+
+Disco /dev/mapper/vg_datos-vl_media: 425 GiB, 456331886592 bytes, 891273216 sectores
+Unidades: sectores de 1 * 512 = 512 bytes
+Tamaño de sector (lógico/físico): 512 bytes / 512 bytes
+Tamaño de E/S (mínimo/óptimo): 512 bytes / 512 bytes
+
+
+Disco /dev/mapper/vg_varios-vl_www: 105 GiB, 112738697216 bytes, 220192768 sectores
+Unidades: sectores de 1 * 512 = 512 bytes
+Tamaño de sector (lógico/físico): 512 bytes / 512 bytes
+Tamaño de E/S (mínimo/óptimo): 512 bytes / 512 bytes
+
+
+Disco /dev/mapper/vg_varios-vl_ftp: 245 GiB, 263058358272 bytes, 513785856 sectores
+Unidades: sectores de 1 * 512 = 512 bytes
+Tamaño de sector (lógico/físico): 512 bytes / 512 bytes
+Tamaño de E/S (mínimo/óptimo): 512 bytes / 512 bytes
+
+b)
+
+pvcreate /dev/sdb1
+pvcreate /dev/sdc1
+pvcreate /dev/sdc2
+pvcreate /dev/sdd1
+pvcreate /dev/sdd2
+pvcreate /dev/sdd5
+pvcreate /dev/sde
+
+c)
+
+vgcreate vg_varios /dev/sdb1 /dev/sdc1 /dev/sdc2
+vgcreate vg_datos /dev/sdd1 /dev/dd2 /dev/sdd5 /dev/sde
+
+d)
+
+lvcreate vg_datos -l 50%VG -n vl_media
+lvcreate vg_varios -l 70%VG -n vl_ftp
+lvcreate vg_varios -l 30%VG -n vl_www
+mkfs.ext4 /dev/mapper/vg_varios-vl_ftp
+mkfs.ext4 /dev/mapper/vg_varios-vl_www
+mkfs.ext3 /dev/mapper/vg_datos-vl_media
+mkdir /mnt/ftp
+mkdir /mnt/www
+mkdir /mnt/media
+
+e)
+
+mount -t ext3 /dev/vg_datos/vl_media  /mnt/media
+mount -t ext4 /dev/vg_varios/vl_ftp /mnt/ftp
+mount -t ext4 /dev/vg_varios/vl_www /mnt/www
+
+f)
+
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+# / was on /dev/sda1 during installation
+UUID=b439fd3c-8742-457b-928c-c05457119612 /               ext4    errors=remount-ro 0       1
+# swap was on /dev/sda5 during installation
+UUID=ee49c0a5-c62d-407f-bc4d-56f145473b8f none            swap    sw              0       0
+/dev/sr0        /media/cdrom0   udf,iso9660 user,noauto     0       0
+
+#logic volumes
+UUID=9478ef78-702b-460a-bbe9-b15dd386b716 /mnt/media	ext3	defaults 0 1
+UUID=27afa007-1528-4cf2-8529-af371627e875 /mnt/ftp	ext4	defaults 0 1
+UUID=9455bebf-aa33-40d5-841b-3a579922552d /mnt/www	ext4	defaults 0 1
